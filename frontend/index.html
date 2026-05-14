@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Opportunity Aggregator</title>
+    <style>
+        :root {
+            --primary: #8a2be2;
+            --secondary: #ff006e;
+            --accent: #ffbe0b;
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --text: #ffffff;
+            --text-light: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        input, select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--primary);
+            background: var(--card-bg);
+            color: white;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border-top: 4px solid var(--primary);
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            background-color: var(--accent);
+            color: #000;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            flex-grow: 1;
+        }
+
+        .card .footer {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            background-color: var(--secondary);
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Startup Aggregator</h1>
+            <p>Find the best opportunities for your startup</p>
+        </header>
+
+        <div class="filters">
+            <input type="text" id="search" placeholder="Search opportunities...">
+            <select id="type-filter">
+                <option value="">All Types</option>
+                <option value="Accelerator">Accelerator</option>
+                <option value="Grant">Grant</option>
+                <option value="Job">Job</option>
+                <option value="Other">Other</option>
+            </select>
+            <button class="btn" onclick="fetchData()">Search</button>
+        </div>
+
+        <div id="opportunities-grid" class="grid">
+            <!-- Cards will be injected here -->
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/opportunities';
+
+        async function fetchData() {
+            const searchQuery = document.getElementById('search').value;
+            const typeFilter = document.getElementById('type-filter').value;
+            
+            let url = API_URL;
+            const params = new URLSearchParams();
+            if (searchQuery) params.append('q', searchQuery);
+            if (typeFilter) params.append('type', typeFilter);
+            if (params.toString()) url += '?' + params.toString();
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                renderCards(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function renderCards(opportunities) {
+            const grid = document.getElementById('opportunities-grid');
+            grid.innerHTML = '';
+
+            opportunities.forEach(opp => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <span class="badge">${opp.opportunity_type}</span>
+                    <h3>${opp.title}</h3>
+                    <p>${opp.description.substring(0, 150)}${opp.description.length > 150 ? '...' : ''}</p>
+                    <div class="footer">
+                        <span>📍 ${opp.location}</span>
+                        <span>📅 ${opp.deadline || 'N/A'}</span>
+                    </div>
+                    <a href="${opp.source_link}" target="_blank" class="btn">Apply Now</a>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Initial fetch
+        fetchData();
+    </script>
+</body>
+</html>

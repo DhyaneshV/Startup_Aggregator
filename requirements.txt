@@ -1,0 +1,7 @@
+flask
+pymongo
+requests
+beautifulsoup4
+apscheduler
+python-dotenv
+flask-cors
