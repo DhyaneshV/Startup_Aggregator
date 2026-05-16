@@ -4,252 +4,429 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Startup Opportunity Aggregator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #8a2be2;
-            --secondary: #ff006e;
-            --accent: #ffbe0b;
-            --bg: #121212;
-            --card-bg: #1e1e1e;
-            --text: #ffffff;
-            --text-light: #e0e0e0;
+            --primary: #a855f7;
+            --primary-glow: rgba(168, 85, 247, 0.4);
+            --secondary: #ec4899;
+            --accent: #f59e0b;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(15, 23, 42, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.2s ease-in-out;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
             color: var(--text);
             margin: 0;
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            color: var(--primary);
-            font-size: 2.5rem;
+            padding: 0;
+            min-height: 100vh;
+            line-height: 1.6;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .search-container {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 50px;
         }
 
         .filters {
             display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 12px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
         }
 
         input, select {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid var(--primary);
-            background: var(--card-bg);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            background: rgba(15, 23, 42, 0.5);
             color: white;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+
+        input#search {
+            flex-grow: 1;
+            min-width: 250px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--primary-glow);
+        }
+
+        .btn-export {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-export:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 30px;
         }
 
         .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            border-top: 4px solid var(--primary);
-            transition: transform 0.3s;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid var(--card-border);
             display: flex;
             flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
+            border-color: rgba(168, 85, 247, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
-        .card h3 {
-            margin-top: 0;
-            color: var(--primary);
+        .card:hover::before {
+            opacity: 1;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            background-color: var(--accent);
-            color: #000;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .card p {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            flex-grow: 1;
-        }
-
-        .card .footer {
-            margin-top: 15px;
-            font-size: 0.8rem;
-            border-top: 1px solid #333;
-            padding-top: 10px;
+        .badge-group {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
         }
 
-        .btn {
-            background-color: var(--secondary);
+        .badge {
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-type {
+            background: rgba(168, 85, 247, 0.2);
+            color: #d8b4fe;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .badge-source {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent);
+            font-size: 0.7rem;
+        }
+
+        .card h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+
+        .card-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .info-item span {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .apply-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05);
             color: white;
-            padding: 10px 15px;
             text-decoration: none;
-            border-radius: 5px;
             text-align: center;
-            font-weight: bold;
-            margin-top: 10px;
+            font-weight: 600;
+            border: 1px solid var(--card-border);
         }
 
-        .btn:hover {
-            opacity: 0.9;
+        .apply-btn:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .empty-state {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 100px 20px;
+            background: var(--card-bg);
+            border-radius: 30px;
+            border: 1px dashed var(--card-border);
+        }
+
+        .empty-state h2 {
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2.5rem; }
+            .filters { flex-direction: column; align-items: stretch; }
+            .search-container { position: relative; top: 0; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🚀 Startup Aggregator</h1>
-            <p>Find the best opportunities for your startup</p>
+            <h1>AggregatoR.</h1>
+            <p>Premium Startup Opportunity Discovery Engine</p>
         </header>
 
-        <div class="filters">
-            <input type="text" id="search" placeholder="Search opportunities...">
-            <select id="type-filter">
-                <option value="">All Types</option>
-                <option value="Accelerator">Accelerator</option>
-                <option value="Grant">Grant</option>
-                <option value="Job">Job</option>
-                <option value="Conference">Conference</option>
-                <option value="Other">Other</option>
-            </select>
-            <select id="source-filter">
-                <option value="">All Sources</option>
-            </select>
-            <select id="sort-filter">
-                <option value="deadline">Sort by Deadline</option>
-                <option value="newest">Newest First</option>
-            </select>
-            <button class="btn" onclick="fetchData()">Search</button>
-            <button class="btn" style="background-color: var(--accent); color: black;" onclick="exportData()">Export JSON</button>
+        <div class="search-container">
+            <div class="filters">
+                <input type="text" id="search" placeholder="Search keywords (e.g. AI, Fintech)..." onkeypress="handleKeyPress(event)">
+                
+                <select id="type-filter">
+                    <option value="">All Types</option>
+                    <option value="Accelerator">Accelerator</option>
+                    <option value="Grant">Grant</option>
+                    <option value="Job">Job</option>
+                    <option value="Conference">Conference</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <select id="source-filter">
+                    <option value="">All Sources</option>
+                </select>
+
+                <select id="sort-filter">
+                    <option value="deadline">📅 Upcoming First</option>
+                    <option value="newest">✨ Newest First</option>
+                </select>
+
+                <button class="btn btn-primary" onclick="fetchData()">
+                    <span>Search</span>
+                </button>
+                
+                <button class="btn btn-export" onclick="exportData()" title="Export results to JSON">
+                    <span>Export</span>
+                </button>
+            </div>
         </div>
 
         <div id="opportunities-grid" class="grid">
-            <!-- Cards will be injected here -->
+            <!-- Cards injected here -->
         </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:5000/api/opportunities';
-        const STATS_URL = 'http://localhost:5000/api/stats';
+        const API_BASE = 'http://localhost:5000/api';
         let currentData = [];
 
         async function fetchStats() {
             try {
-                const response = await fetch(STATS_URL);
-                const stats = await response.json();
+                const res = await fetch(`${API_BASE}/stats`);
+                const stats = await res.json();
                 const sourceFilter = document.getElementById('source-filter');
                 
+                // Clear existing options except the first one
+                while (sourceFilter.options.length > 1) sourceFilter.remove(1);
+
                 stats.sources.forEach(source => {
-                    const option = document.createElement('option');
-                    option.value = source;
-                    option.textContent = source;
-                    sourceFilter.appendChild(option);
+                    const opt = document.createElement('option');
+                    opt.value = source;
+                    opt.textContent = source;
+                    sourceFilter.appendChild(opt);
                 });
-            } catch (error) {
-                console.error('Error fetching stats:', error);
+            } catch (err) {
+                console.error('Stats fetch error:', err);
             }
         }
 
         async function fetchData() {
-            const searchQuery = document.getElementById('search').value;
-            const typeFilter = document.getElementById('type-filter').value;
-            const sourceFilter = document.getElementById('source-filter').value;
-            const sortFilter = document.getElementById('sort-filter').value;
+            const grid = document.getElementById('opportunities-grid');
+            grid.innerHTML = '<div class="empty-state"><h2>Loading amazing opportunities...</h2></div>';
+
+            const query = document.getElementById('search').value;
+            const type = document.getElementById('type-filter').value;
+            const source = document.getElementById('source-filter').value;
+            const sort = document.getElementById('sort-filter').value;
             
-            let url = API_URL;
             const params = new URLSearchParams();
-            if (searchQuery) params.append('q', searchQuery);
-            if (typeFilter) params.append('type', typeFilter);
-            if (sourceFilter) params.append('source', sourceFilter);
-            if (params.toString()) url += '?' + params.toString();
+            if (query) params.append('q', query);
+            if (type) params.append('type', type);
+            if (source) params.append('source', source);
+            if (sort) params.append('sort', sort);
 
             try {
-                const response = await fetch(url);
-                let data = await response.json();
-                
-                // Client-side sorting for Newest First (deadline is sorted by default on backend)
-                if (sortFilter === 'newest') {
-                    data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                }
-
+                const res = await fetch(`${API_BASE}/opportunities?${params.toString()}`);
+                const data = await res.json();
                 currentData = data;
                 renderCards(data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
+            } catch (err) {
+                console.error('Data fetch error:', err);
+                grid.innerHTML = '<div class="empty-state"><h2>Connection error. Is the backend running?</h2></div>';
             }
         }
 
-        function renderCards(opportunities) {
+        function renderCards(items) {
             const grid = document.getElementById('opportunities-grid');
             grid.innerHTML = '';
 
-            if (opportunities.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No opportunities found matching your criteria.</p>';
+            if (!items || items.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h2>No matches found</h2>
+                        <p>Try adjusting your filters or search keywords.</p>
+                    </div>`;
                 return;
             }
 
-            opportunities.forEach(opp => {
+            items.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
+                
+                // Clean description
+                let desc = item.description || "No description provided.";
+                if (desc.length > 140) desc = desc.substring(0, 137) + "...";
+
                 card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <span class="badge">${opp.opportunity_type}</span>
-                        <span style="font-size: 0.7rem; color: var(--accent); opacity: 0.8;">${opp.source}</span>
+                    <div class="badge-group">
+                        <span class="badge badge-type">${item.opportunity_type}</span>
+                        <span class="badge badge-source">${item.source}</span>
                     </div>
-                    <h3>${opp.title}</h3>
-                    <p>${opp.description ? (opp.description.substring(0, 150) + (opp.description.length > 150 ? '...' : '')) : 'No description available.'}</p>
-                    <div class="footer">
-                        <span>📍 ${opp.location || 'Remote'}</span>
-                        <span>📅 ${opp.deadline || 'Ongoing'}</span>
+                    <h3>${item.title}</h3>
+                    <p>${desc}</p>
+                    <div class="card-info">
+                        <div class="info-item">📍 <span>${item.location || 'Global'}</span></div>
+                        <div class="info-item">📅 <span>${item.deadline || 'Ongoing'}</span></div>
                     </div>
-                    <a href="${opp.source_link}" target="_blank" class="btn">Apply Now</a>
+                    <a href="${item.source_link}" target="_blank" class="apply-btn">View Opportunity</a>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        function exportData() {
-            if (currentData.length === 0) {
-                alert('No data to export!');
-                return;
-            }
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentData, null, 2));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "startup_opportunities.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') fetchData();
         }
 
-        // Initial fetch
+        function exportData() {
+            if (currentData.length === 0) return alert('Nothing to export!');
+            const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `opportunities_export_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        // Initialize
         fetchStats();
         fetchData();
     </script>

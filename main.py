@@ -24,6 +24,7 @@ def get_opportunities():
     source = request.args.get('source')
     region = request.args.get('region')
     keyword = request.args.get('q')
+    sort_by = request.args.get('sort', 'deadline')
 
     if opp_type: filters['opportunity_type'] = opp_type
     if source: filters['source'] = source
@@ -31,7 +32,7 @@ def get_opportunities():
     if keyword: filters['keyword'] = keyword
 
     try:
-        opportunities = OpportunityDB.get_all_opportunities(filters)
+        opportunities = OpportunityDB.get_all_opportunities(filters, sort_by=sort_by)
         # Convert QuerySet to list of dictionaries
         data = []
         for opp in opportunities:
@@ -47,7 +48,8 @@ def get_opportunities():
                 "source": opp.source,
                 "description": opp.description,
                 "eligibility": opp.eligibility,
-                "ai_tags": opp.ai_tags
+                "ai_tags": opp.ai_tags,
+                "created_at": opp.created_at.isoformat() if opp.created_at else None
             })
         return jsonify(data)
     except Exception as e:

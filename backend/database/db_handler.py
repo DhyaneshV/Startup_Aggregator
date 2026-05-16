@@ -27,8 +27,8 @@ class OpportunityDB:
             return False, str(e)
 
     @staticmethod
-    def get_all_opportunities(filters=None):
-        """Retrieves opportunities with optional filtering."""
+    def get_all_opportunities(filters=None, sort_by='deadline'):
+        """Retrieves opportunities with optional filtering and sorting."""
         query = Opportunity.objects
         if filters:
             if 'opportunity_type' in filters:
@@ -40,7 +40,11 @@ class OpportunityDB:
             if 'keyword' in filters:
                 query = query.search_text(filters['keyword'])
         
-        return query.order_by('deadline')
+        if sort_by == 'newest':
+            return query.order_by('-created_at')
+        else:
+            # Default to deadline ascending
+            return query.order_by('deadline')
 
     @staticmethod
     def get_stats():
