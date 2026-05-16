@@ -136,9 +136,18 @@
                 <option value="Accelerator">Accelerator</option>
                 <option value="Grant">Grant</option>
                 <option value="Job">Job</option>
+                <option value="Conference">Conference</option>
                 <option value="Other">Other</option>
             </select>
+            <select id="source-filter">
+                <option value="">All Sources</option>
+            </select>
+            <select id="sort-filter">
+                <option value="deadline">Sort by Deadline</option>
+                <option value="newest">Newest First</option>
+            </select>
             <button class="btn" onclick="fetchData()">Search</button>
+            <button class="btn" style="background-color: var(--accent); color: black;" onclick="exportData()">Export JSON</button>
         </div>
 
         <div id="opportunities-grid" class="grid">
@@ -148,20 +157,49 @@
 
     <script>
         const API_URL = 'http://localhost:5000/api/opportunities';
+        const STATS_URL = 'http://localhost:5000/api/stats';
+        let currentData = [];
+
+        async function fetchStats() {
+            try {
+                const response = await fetch(STATS_URL);
+                const stats = await response.json();
+                const sourceFilter = document.getElementById('source-filter');
+                
+                stats.sources.forEach(source => {
+                    const option = document.createElement('option');
+                    option.value = source;
+                    option.textContent = source;
+                    sourceFilter.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        }
 
         async function fetchData() {
             const searchQuery = document.getElementById('search').value;
             const typeFilter = document.getElementById('type-filter').value;
+            const sourceFilter = document.getElementById('source-filter').value;
+            const sortFilter = document.getElementById('sort-filter').value;
             
             let url = API_URL;
             const params = new URLSearchParams();
             if (searchQuery) params.append('q', searchQuery);
             if (typeFilter) params.append('type', typeFilter);
+            if (sourceFilter) params.append('source', sourceFilter);
             if (params.toString()) url += '?' + params.toString();
 
             try {
                 const response = await fetch(url);
-                const data = await response.json();
+                let data = await response.json();
+                
+                // Client-side sorting for Newest First (deadline is sorted by default on backend)
+                if (sortFilter === 'newest') {
+                    data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                }
+
+                currentData = data;
                 renderCards(data);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -172,16 +210,24 @@
             const grid = document.getElementById('opportunities-grid');
             grid.innerHTML = '';
 
+            if (opportunities.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No opportunities found matching your criteria.</p>';
+                return;
+            }
+
             opportunities.forEach(opp => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <span class="badge">${opp.opportunity_type}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <span class="badge">${opp.opportunity_type}</span>
+                        <span style="font-size: 0.7rem; color: var(--accent); opacity: 0.8;">${opp.source}</span>
+                    </div>
                     <h3>${opp.title}</h3>
-                    <p>${opp.description.substring(0, 150)}${opp.description.length > 150 ? '...' : ''}</p>
+                    <p>${opp.description ? (opp.description.substring(0, 150) + (opp.description.length > 150 ? '...' : '')) : 'No description available.'}</p>
                     <div class="footer">
-                        <span>📍 ${opp.location}</span>
-                        <span>📅 ${opp.deadline || 'N/A'}</span>
+                        <span>📍 ${opp.location || 'Remote'}</span>
+                        <span>📅 ${opp.deadline || 'Ongoing'}</span>
                     </div>
                     <a href="${opp.source_link}" target="_blank" class="btn">Apply Now</a>
                 `;
@@ -189,7 +235,22 @@
             });
         }
 
+        function exportData() {
+            if (currentData.length === 0) {
+                alert('No data to export!');
+                return;
+            }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "startup_opportunities.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
         // Initial fetch
+        fetchStats();
         fetchData();
     </script>
 </body>
