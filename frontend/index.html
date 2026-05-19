@@ -3,432 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Startup Opportunity Aggregator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>AURA — The Opportunity Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --primary: #a855f7;
-            --primary-glow: rgba(168, 85, 247, 0.4);
-            --secondary: #ec4899;
-            --accent: #f59e0b;
-            --bg: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --glass-bg: rgba(15, 23, 42, 0.8);
+            --bg: #010101;
+            --surface: rgba(12, 12, 12, 0.4);
+            --border: rgba(255, 255, 255, 0.05);
+            --border-bright: rgba(255, 255, 255, 0.12);
+            --text: #F8FAFC;
+            --text-dim: #717171;
+            --accent: #0066FF;
+            --accent-glow: rgba(0, 102, 255, 0.15);
+            --noise: url('https://grainy-gradients.vercel.app/noise.svg');
         }
 
-        * {
-            box-sizing: border-box;
-            transition: all 0.2s ease-in-out;
+        /* --- Splash Animations --- */
+        @keyframes letterBloom {
+            0% { opacity: 0; filter: blur(20px); transform: scale(0.8) translateY(10px); }
+            100% { opacity: 1; filter: blur(0px); transform: scale(1) translateY(0); }
         }
+        @keyframes splashQuote { 
+            0% { opacity: 0; transform: translateY(10px); } 
+            100% { opacity: 0.5; transform: translateY(0); } 
+        }
+        @keyframes splashExit { 
+            0% { opacity: 1; filter: blur(0px); }
+            100% { opacity: 0; filter: blur(20px); visibility: hidden; } 
+        }
+
+        /* --- Main App Animations --- */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); filter: blur(15px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+        @keyframes auroraMove { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(8%, 8%) scale(1.05); } 100% { transform: translate(0, 0) scale(1); } }
+        @keyframes breathe { 0%, 100% { opacity: 0.2; transform: scale(1); filter: blur(120px); } 50% { opacity: 0.4; transform: scale(1.05); filter: blur(160px); } }
+        @keyframes toastIn { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
             background-color: var(--bg);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
             color: var(--text);
-            margin: 0;
-            padding: 0;
+            font-size: 13px;
+            letter-spacing: -0.02em;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
             min-height: 100vh;
-            line-height: 1.6;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
+        /* --- Splash Screen --- */
+        #splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            animation: splashExit 1s cubic-bezier(0.16, 1, 0.3, 1) 5s forwards;
+        }
+        .splash-title { 
+            display: flex; gap: 12px; font-size: 100px; font-weight: 800; letter-spacing: 0.1em; color: #FFF;
+        }
+        .splash-title span {
+            display: inline-block;
+            opacity: 0;
+            animation: letterBloom 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .splash-title span:nth-child(1) { animation-delay: 0.2s; }
+        .splash-title span:nth-child(2) { animation-delay: 0.5s; }
+        .splash-title span:nth-child(3) { animation-delay: 0.8s; }
+        .splash-title span:nth-child(4) { animation-delay: 1.1s; }
+
+        .splash-quote { 
+            margin-top: 60px; font-size: 16px; font-weight: 400; font-style: italic; color: #FFF; opacity: 0;
+            max-width: 600px; text-align: center; line-height: 1.6;
+            animation: splashQuote 1.5s ease-out 2.5s forwards;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 60px;
+        /* --- Master Environment --- */
+        .aurora-env { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; mix-blend-mode: screen; transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .orb-1 { top: -20%; left: -10%; width: 100vw; height: 100vh; background: radial-gradient(circle, var(--accent-glow), transparent 70%); animation: auroraMove 40s infinite ease-in-out, breathe 20s infinite ease-in-out; }
+        .orb-2 { bottom: -20%; right: -10%; width: 90vw; height: 90vh; background: radial-gradient(circle, rgba(168, 85, 247, 0.04), transparent 70%); animation: auroraMove 45s infinite reverse ease-in-out, breathe 25s infinite ease-in-out; }
+        
+        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: var(--noise); opacity: 0.03; pointer-events: none; z-index: 9998; }
+
+        .layout { display: flex; position: relative; z-index: 10; opacity: 0; animation: fadeIn 1.5s ease-out 5.5s forwards; }
+
+        .sidebar {
+            width: 280px; border-right: 1px solid var(--border); padding: 48px 32px; display: flex; flex-direction: column; gap: 56px;
+            position: fixed; height: 100vh; background: rgba(2, 2, 2, 0.3); backdrop-filter: blur(60px); z-index: 1000;
         }
 
-        header h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            letter-spacing: -1px;
-        }
+        .main { margin-left: 280px; flex: 1; padding: 80px 100px; max-width: 1700px; }
 
-        header p {
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            font-weight: 400;
-        }
+        .logo { font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 14px; letter-spacing: 0.3em; color: #FFF; }
+        .logo-box { width: 18px; height: 18px; border: 2px solid #FFF; border-radius: 50%; }
+        
+        .nav-section { display: flex; flex-direction: column; gap: 8px; }
+        .nav-head { font-size: 9px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 12px; padding-left: 14px; }
+        .nav-btn { padding: 12px 18px; border-radius: 12px; cursor: pointer; color: var(--text-dim); font-weight: 600; display: flex; align-items: center; gap: 14px; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .nav-btn:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+        .nav-btn.active { color: var(--text); background: rgba(255,255,255,0.06); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
-        .search-container {
-            position: sticky;
-            top: 20px;
-            z-index: 100;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid var(--card-border);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            margin-bottom: 50px;
-        }
+        select { background: rgba(255,255,255,0.02); border: 1px solid var(--border); color: var(--text); padding: 14px 20px; border-radius: 14px; font-size: 12px; font-weight: 600; outline: none; cursor: pointer; transition: 0.3s; width: 100%; }
+        option { background: #0A0A0A; color: white; }
 
-        .filters {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-        }
+        .hero { margin-bottom: 72px; }
+        .hero h1 { font-size: 48px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; margin-bottom: 12px; background: linear-gradient(to bottom, #FFF 20%, rgba(255,255,255,0.3) 150%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-dim); font-size: 16px; font-weight: 500; }
 
-        input, select {
-            padding: 12px 20px;
-            border-radius: 12px;
-            border: 1px solid var(--card-border);
-            background: rgba(15, 23, 42, 0.5);
-            color: white;
-            font-size: 0.95rem;
-            outline: none;
-        }
+        .search-area { position: sticky; top: 40px; z-index: 500; margin-bottom: 64px; display: flex; align-items: center; gap: 24px; }
+        .search-bar { flex: 1; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 20px; padding: 4px 24px; display: flex; align-items: center; gap: 16px; backdrop-filter: blur(40px); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .search-bar:focus-within { border-color: var(--border-bright); background: rgba(255,255,255,0.05); transform: translateY(-2px); box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+        .search-bar input { background: transparent; border: none; color: var(--text); padding: 18px 0; outline: none; width: 100%; font-size: 15px; font-weight: 500; }
 
-        input:focus, select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px var(--primary-glow);
-        }
-
-        input#search {
-            flex-grow: 1;
-            min-width: 250px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #7c3aed);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px var(--primary-glow);
-        }
-
-        .btn-export {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-            border: 1px solid var(--card-border);
-        }
-
-        .btn-export:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 30px;
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 32px; align-items: start; }
 
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 30px;
-            border: 1px solid var(--card-border);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 40px; padding: 40px; 
+            display: flex; flex-direction: column; min-height: 440px; position: relative; overflow: hidden;
+            backdrop-filter: blur(25px); transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .card:hover { transform: translateY(-12px); border-color: var(--border-bright); background: rgba(25, 25, 25, 0.4); box-shadow: 0 50px 100px -20px rgba(0,0,0,1); }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            opacity: 0;
-            transition: opacity 0.3s;
+        .card::after {
+            content: ""; position: absolute; inset: -1px; border-radius: 40px; padding: 1px;
+            background: radial-gradient(600px circle at var(--mx) var(--my), rgba(255,255,255,0.25), transparent 40%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; opacity: 0; transition: opacity 0.5s;
         }
+        .card:hover::after { opacity: 1; }
 
-        .card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(168, 85, 247, 0.3);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        .spotlight {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,0.1), transparent 45%);
+            pointer-events: none; opacity: 0; transition: opacity 0.5s;
         }
+        .card:hover .spotlight { opacity: 1; }
 
-        .card:hover::before {
-            opacity: 1;
-        }
+        .type-badge { font-size: 10px; font-weight: 800; color: var(--accent); background: rgba(0, 102, 255, 0.1); padding: 6px 16px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 32px; width: fit-content; }
+        .card h3 { font-size: 24px; font-weight: 700; letter-spacing: -0.05em; line-height: 1.1; margin-bottom: 12px; }
+        .org-name { color: var(--text-dim); font-size: 15px; font-weight: 600; margin-bottom: 32px; }
 
-        .badge-group {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+        .desc-wrap { position: relative; margin-bottom: 40px; }
+        .desc-text { color: var(--text-dim); font-size: 15px; line-height: 1.8; overflow: hidden; transition: max-height 0.8s cubic-bezier(0.16, 1, 0.3, 1); max-height: 82px; white-space: pre-wrap; }
+        .desc-text.expanded { max-height: 1500px; color: var(--text); }
+        .vapor-mask { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: linear-gradient(to top, rgba(10,10,10,0.8) 10%, transparent); pointer-events: none; transition: 0.5s; }
+        .desc-text.expanded + .vapor-mask { opacity: 0; }
 
-        .badge {
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .unfold-btn { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); color: var(--white); font-size: 10px; font-weight: 800; cursor: pointer; padding: 8px 18px; border-radius: 10px; margin-top: 20px; display: inline-flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.1em; transition: 0.3s; }
+        .unfold-btn:hover { background: rgba(255, 255, 255, 0.08); transform: translateX(5px); }
 
-        .badge-type {
-            background: rgba(168, 85, 247, 0.2);
-            color: #d8b4fe;
-            border: 1px solid rgba(168, 85, 247, 0.3);
-        }
+        .card-bottom { margin-top: auto; padding-top: 32px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 32px; }
+        .meta-row { display: flex; gap: 32px; font-size: 13px; color: var(--text-dim); font-weight: 600; }
+        .meta-cell { display: flex; align-items: center; gap: 12px; }
 
-        .badge-source {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--accent);
-            font-size: 0.7rem;
-        }
+        .action-row { display: flex; gap: 16px; }
+        .action-btn { flex: 1; height: 56px; border-radius: 18px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); text-decoration: none; }
+        .action-btn-p { background: var(--text); color: var(--bg); border: none; }
+        .action-btn-p:hover { background: #FFF; transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 30px rgba(255,255,255,0.15); }
+        .action-btn-s { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); color: var(--text); }
+        .action-btn-s:hover { border-color: var(--border-bright); background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); }
+        .action-btn-s.active { color: var(--accent); border-color: var(--accent); background: rgba(0, 102, 255, 0.08); }
 
-        .card h3 {
-            margin: 0 0 15px 0;
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text);
-            line-height: 1.3;
-        }
-
-        .card p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 25px;
-            flex-grow: 1;
-        }
-
-        .card-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-            padding-top: 20px;
-            border-top: 1px solid var(--card-border);
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .info-item span {
-            color: var(--text);
-            font-weight: 500;
-        }
-
-        .apply-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            text-decoration: none;
-            text-align: center;
-            font-weight: 600;
-            border: 1px solid var(--card-border);
-        }
-
-        .apply-btn:hover {
-            background: var(--text);
-            color: var(--bg);
-        }
-
-        .empty-state {
-            grid-column: 1/-1;
-            text-align: center;
-            padding: 100px 20px;
-            background: var(--card-bg);
-            border-radius: 30px;
-            border: 1px dashed var(--card-border);
-        }
-
-        .empty-state h2 {
-            color: var(--text-muted);
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 768px) {
-            header h1 { font-size: 2.5rem; }
-            .filters { flex-direction: column; align-items: stretch; }
-            .search-container { position: relative; top: 0; }
-        }
+        #toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: #FFF; color: #000; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 13px; z-index: 10000; display: none; animation: toastIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>AggregatoR.</h1>
-            <p>Premium Startup Opportunity Discovery Engine</p>
-        </header>
+    <div id="splash">
+        <div class="splash-title">
+            <span>A</span><span>U</span><span>R</span><span>A</span>
+        </div>
+        <div class="splash-quote">“The future belongs to those who see opportunities before they become obvious.”</div>
+    </div>
 
-        <div class="search-container">
-            <div class="filters">
-                <input type="text" id="search" placeholder="Search keywords (e.g. AI, Fintech)..." onkeypress="handleKeyPress(event)">
-                
-                <select id="type-filter">
-                    <option value="">All Types</option>
-                    <option value="Accelerator">Accelerator</option>
-                    <option value="Grant">Grant</option>
-                    <option value="Job">Job</option>
-                    <option value="Conference">Conference</option>
-                    <option value="Other">Other</option>
-                </select>
-
-                <select id="source-filter">
-                    <option value="">All Sources</option>
-                </select>
-
-                <select id="sort-filter">
-                    <option value="deadline">📅 Upcoming First</option>
-                    <option value="newest">✨ Newest First</option>
-                </select>
-
-                <button class="btn btn-primary" onclick="fetchData()">
-                    <span>Search</span>
-                </button>
-                
-                <button class="btn btn-export" onclick="exportData()" title="Export results to JSON">
-                    <span>Export</span>
-                </button>
+    <div id="toast">Saved to Vault</div>
+    <div class="aurora-env" id="env"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+    
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="logo"><div class="logo-box"></div> AURA</div>
+            <div class="nav-section">
+                <p class="nav-head">Navigator</p>
+                <div class="nav-btn active" onclick="switchTab('discovery')" id="tab-discovery"><i data-lucide="compass" size="18"></i> Discovery</div>
+                <div class="nav-btn" onclick="switchTab('saved')" id="tab-saved"><i data-lucide="bookmark" size="18"></i> The Vault</div>
             </div>
-        </div>
-
-        <div id="opportunities-grid" class="grid">
-            <!-- Cards injected here -->
-        </div>
+            <div class="nav-section">
+                <p class="nav-head">Curate Index</p>
+                <select id="type-filter" onchange="fetchData()"><option value="">All Categories</option></select>
+                <select id="region-filter" onchange="fetchData()" style="margin-top: 16px;"><option value="">All Regions</option><option value="India">India</option><option value="International">International</option></select>
+            </div>
+        </aside>
+        <main class="main">
+            <header class="hero"><h1 id="page-title">Discovery</h1><p id="page-desc">Advanced index of world-class startup resources.</p></header>
+            <div class="search-area">
+                <div class="search-bar"><i data-lucide="search" size="20" style="color: var(--text-dim);"></i><input type="text" id="search" placeholder="Search the global repository..." onkeypress="if(event.key==='Enter') fetchData()"></div>
+                <div style="font-size: 10px; font-weight: 900; color: var(--text-dim); letter-spacing: 0.2em;"><span id="result-count">0</span> RESULTS</div>
+            </div>
+            <div id="grid" class="grid"></div>
+        </main>
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:5000/api';
-        let currentData = [];
+        const API_HOSTS = ['http://localhost:5000', 'http://127.0.0.1:5000'];
+        let activeHost = API_HOSTS[0], currentTab = 'discovery', savedIds = JSON.parse(localStorage.getItem('saved_opps') || '[]');
 
-        async function fetchStats() {
-            try {
-                const res = await fetch(`${API_BASE}/stats`);
-                const stats = await res.json();
-                const sourceFilter = document.getElementById('source-filter');
-                
-                // Clear existing options except the first one
-                while (sourceFilter.options.length > 1) sourceFilter.remove(1);
-
-                stats.sources.forEach(source => {
-                    const opt = document.createElement('option');
-                    opt.value = source;
-                    opt.textContent = source;
-                    sourceFilter.appendChild(opt);
-                });
-            } catch (err) {
-                console.error('Stats fetch error:', err);
-            }
-        }
-
+        async function tryFetch(path) { for (let host of API_HOSTS) { try { const res = await fetch(host + path); if (res.ok) return res; } catch (e) {} } throw new Error('Offline'); }
+        async function fetchStats() { try { const res = await tryFetch('/api/stats'), s = await res.json(), f = document.getElementById('type-filter'); s.types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; f.appendChild(o); }); } catch (e) {} }
+        function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
         async function fetchData() {
-            const grid = document.getElementById('opportunities-grid');
-            grid.innerHTML = '<div class="empty-state"><h2>Loading amazing opportunities...</h2></div>';
-
-            const query = document.getElementById('search').value;
-            const type = document.getElementById('type-filter').value;
-            const source = document.getElementById('source-filter').value;
-            const sort = document.getElementById('sort-filter').value;
-            
-            const params = new URLSearchParams();
-            if (query) params.append('q', query);
-            if (type) params.append('type', type);
-            if (source) params.append('source', source);
-            if (sort) params.append('sort', sort);
-
-            try {
-                const res = await fetch(`${API_BASE}/opportunities?${params.toString()}`);
-                const data = await res.json();
-                currentData = data;
-                renderCards(data);
-            } catch (err) {
-                console.error('Data fetch error:', err);
-                grid.innerHTML = '<div class="empty-state"><h2>Connection error. Is the backend running?</h2></div>';
-            }
+            const g = document.getElementById('grid'); g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:100px;color:var(--text-dim)">SYNCING ENVIRONMENT...</div>';
+            if (currentTab === 'saved') { renderSaved(); return; }
+            const q = document.getElementById('search').value, t = document.getElementById('type-filter').value, r = document.getElementById('region-filter').value;
+            let p = '/api/opportunities?'; if (q) p += 'q=' + encodeURIComponent(q) + '&'; if (t) p += 'type=' + encodeURIComponent(t) + '&'; if (r) p += 'region=' + encodeURIComponent(r);
+            try { const res = await tryFetch(p), data = await res.json(); document.getElementById('result-count').textContent = data.length; renderCards(data); } catch (e) { g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:100px;color:var(--text-dim)">CONNECTION ERROR</div>'; }
         }
-
         function renderCards(items) {
-            const grid = document.getElementById('opportunities-grid');
-            grid.innerHTML = '';
-
-            if (!items || items.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <h2>No matches found</h2>
-                        <p>Try adjusting your filters or search keywords.</p>
-                    </div>`;
-                return;
-            }
-
-            items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                
-                // Clean description
-                let desc = item.description || "No description provided.";
-                if (desc.length > 140) desc = desc.substring(0, 137) + "...";
-
-                card.innerHTML = `
-                    <div class="badge-group">
-                        <span class="badge badge-type">${item.opportunity_type}</span>
-                        <span class="badge badge-source">${item.source}</span>
-                    </div>
-                    <h3>${item.title}</h3>
-                    <p>${desc}</p>
-                    <div class="card-info">
-                        <div class="info-item">📍 <span>${item.location || 'Global'}</span></div>
-                        <div class="info-item">📅 <span>${item.deadline || 'Ongoing'}</span></div>
-                    </div>
-                    <a href="${item.source_link}" target="_blank" class="apply-btn">View Opportunity</a>
-                `;
-                grid.appendChild(card);
+            const g = document.getElementById('grid'); g.innerHTML = '';
+            items.forEach((item, i) => {
+                const s = savedIds.includes(item.id), c = document.createElement('div'), desc = item.description || "Curated strategic resource.";
+                c.className = 'card'; c.style.animationDelay = (i * 0.05) + 's';
+                c.innerHTML = ' \
+                    <div class="spotlight"></div> \
+                    <div class="type-badge">' + item.opportunity_type + '</div> \
+                    <h3>' + item.title + '</h3> \
+                    <div class="org-name">by ' + item.organizer + '</div> \
+                    <div class="desc-wrap"><div class="desc-text" id="t-' + item.id + '">' + desc + '</div>' + (desc.length > 140 ? '<div class="vapor-mask"></div><button class="unfold-btn" onclick="toggleT(\'' + item.id + '\', this)">Details <i data-lucide="chevron-down" size="14"></i></button>' : '') + '</div> \
+                    <div class="card-bottom"> \
+                        <div class="meta-row"><div class="meta-cell"><i data-lucide="globe" size="15"></i> ' + (item.region === "India" ? "India" : "Global") + '</div><div class="meta-cell"><i data-lucide="calendar-days" size="15"></i> ' + (item.deadline_text || "Rolling") + '</div></div> \
+                        <div class="action-row"> \
+                            <a href="' + (item.apply_link || item.source_link) + '" target="_blank" class="action-btn action-btn-p">Visit Portal</a> \
+                            <button class="action-btn action-btn-s ' + (s ? 'active' : '') + '" onclick="toggleS(\'' + item.id + '\', this)"><i data-lucide="' + (s ? 'check' : 'plus') + '" size="16" style="margin-right:10px"></i>' + (s ? 'Saved' : 'Save') + '</button> \
+                        </div> \
+                    </div>';
+                c.addEventListener('mousemove', function(e) { const r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px'); });
+                g.appendChild(c);
             });
+            lucide.createIcons();
         }
-
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') fetchData();
+        function toggleT(id, b) { const t = document.getElementById('t-' + id), exp = t.classList.toggle('expanded'); b.innerHTML = exp ? 'Compact <i data-lucide="chevron-up" size="14"></i>' : 'Details <i data-lucide="chevron-down" size="14"></i>'; lucide.createIcons(); }
+        function toggleS(id, b) {
+            if (savedIds.includes(id)) { savedIds = savedIds.filter(function(i) { return i !== id; }); b.classList.remove('active'); b.innerHTML = '<i data-lucide="plus" size="16" style="margin-right:10px"></i> Save'; showToast('Removed from Vault'); }
+            else { savedIds.push(id); b.classList.add('active'); b.innerHTML = '<i data-lucide="check" size="16" style="margin-right:10px"></i> Saved'; showToast('Saved to Vault'); }
+            localStorage.setItem('saved_opps', JSON.stringify(savedIds)); if (currentTab === 'saved') fetchData(); lucide.createIcons();
         }
+        function switchTab(t) { currentTab = t; document.getElementById('tab-discovery').classList.toggle('active', t === 'discovery'); document.getElementById('tab-saved').classList.toggle('active', t === 'saved'); document.getElementById('page-title').textContent = t === 'discovery' ? 'Discovery' : 'The Vault'; fetchData(); }
+        async function renderSaved() { try { const res = await tryFetch('/api/opportunities'), data = await res.json(), f = data.filter(function(i) { return savedIds.includes(i.id); }); document.getElementById('result-count').textContent = f.length; renderCards(f); } catch (e) {} }
+        
+        document.addEventListener('mousemove', function(e) {
+            const x = (e.clientX / window.innerWidth - 0.5) * 40;
+            const y = (e.clientY / window.innerHeight - 0.5) * 40;
+            const env = document.getElementById('env');
+            if(env) {
+                const orbs = env.querySelectorAll('.orb');
+                orbs[0].style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+                orbs[1].style.transform = 'translate(' + (-x) + 'px, ' + (-y) + 'px)';
+            }
+        });
 
-        function exportData() {
-            if (currentData.length === 0) return alert('Nothing to export!');
-            const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `opportunities_export_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-        }
-
-        // Initialize
-        fetchStats();
-        fetchData();
+        fetchStats(); fetchData(); lucide.createIcons();
     </script>
 </body>
 </html>

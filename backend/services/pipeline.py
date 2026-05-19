@@ -3,6 +3,8 @@ from backend.database.db_config import DatabaseConfig
 from backend.database.db_handler import OpportunityDB
 from backend.scrapers.devto_scraper import DevtoScraper
 from backend.scrapers.hackernews_scraper import HackerNewsScraper
+from backend.scrapers.techcrunch_scraper import TechCrunchScraper
+from backend.scrapers.reddit_scraper import RedditScraper
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -13,13 +15,16 @@ class DataPipeline:
         self.db_handler = OpportunityDB()
         self.scrapers = [
             DevtoScraper(),
-            HackerNewsScraper()
+            HackerNewsScraper(),
+            TechCrunchScraper(),
+            RedditScraper()
         ]
 
     def run(self):
         """Runs the entire pipeline: Scraping -> Database Storage."""
         logger.info("Starting Data Pipeline...")
-        
+...
+
         # 1. Connect to Database
         if not DatabaseConfig.connect():
             logger.error("Pipeline aborted: Could not connect to database.")

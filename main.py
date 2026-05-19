@@ -3,6 +3,7 @@ from flask_cors import CORS
 from backend.database.db_config import DatabaseConfig
 from backend.database.db_handler import OpportunityDB
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -33,7 +34,6 @@ def get_opportunities():
 
     try:
         opportunities = OpportunityDB.get_all_opportunities(filters, sort_by=sort_by)
-        # Convert QuerySet to list of dictionaries
         data = []
         for opp in opportunities:
             data.append({
@@ -44,7 +44,9 @@ def get_opportunities():
                 "location": opp.location,
                 "region": opp.region,
                 "deadline": opp.deadline.strftime('%Y-%m-%d') if opp.deadline else None,
+                "deadline_text": opp.deadline_text,
                 "source_link": opp.source_link,
+                "apply_link": opp.apply_link,
                 "source": opp.source,
                 "description": opp.description,
                 "eligibility": opp.eligibility,
@@ -67,4 +69,5 @@ def get_stats():
         return jsonify({"error": "Failed to fetch stats"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)

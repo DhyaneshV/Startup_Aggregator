@@ -1,4 +1,4 @@
-# 🛠️ Scraping Challenges & Solutions
+# Scraping Challenges & Solutions
 
 Building a robust aggregator for startup opportunities involves overcoming several technical hurdles. Here are the key challenges faced during this project and how they were solved.
 
