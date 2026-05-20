@@ -42,6 +42,16 @@ Since launching the pipeline, I have optimized the system to achieve the followi
 - **Intelligent Alerts:** Integrated notification system that triggers Webhooks (Discord/Slack) whenever new, unique opportunities are detected.
 - **Data Portability:** Full support for exporting filtered results directly to CSV or JSON formats for external analysis.
 
+## References / Tutorials / Tools Used
+
+- **Frameworks:** [Flask](https://flask.palletsprojects.com/) (Backend), [Vanilla JS/CSS](https://developer.mozilla.org/en-US/) (Frontend)
+- **Database:** [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+- **Scraping Tools:** [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/), [Requests](https://requests.readthedocs.io/)
+- **Automation:** [APScheduler](https://apscheduler.readthedocs.io/)
+- **Design Inspiration:** [Glassmorphism CSS Generator](https://glassmorphism.com/)
+- **Icons:** [Lucide Icons](https://lucide.dev/)
+- **Tutorials:** Flask REST API documentation and MongoDB Atlas integration guides.
+
 ## Technical Challenges & Solutions
 
 ### 1. Bypassing Bot Detection (The 403 Forbidden Problem)
