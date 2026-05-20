@@ -14,15 +14,27 @@ Since launching the pipeline, I have optimized the system to achieve the followi
 
 ## Project Visuals
 
-### Main Discovery Dashboard and Hero
-> ![AURA Dashboard](assets/screenshots/aura.png)
-> ![AURA Dashboard](assets/screenshots/Dashboard.png)
-*The AURA interface utilizes a glassmorphic design language, featuring custom-built discovery filters and real-time result counts.*
+### AURA Hero Section
 
-### Data Pipeline & Scrapper
-> ![Pipeline](assets/screenshots/scarapper.png)
-*A modular architecture where scrapers operate as independent micro-services, feeding into a centralized MongoDB Atlas cluster.*
+![AURA Hero](assets/screenshots/aura.png)
 
+*The opening hero interface introducing AURA — The Opportunity Engine, designed with a minimal futuristic aesthetic focused on startup discovery and opportunity aggregation.*
+
+---
+
+### Main Discovery Dashboard
+
+![AURA Dashboard](assets/screenshots/dashboard.png)
+
+*The AURA dashboard utilizes a glassmorphic design language, featuring custom-built discovery filters, category segmentation, and real-time opportunity discovery.*
+
+---
+
+### Data Pipeline & Scraper Architecture
+
+![Pipeline](assets/screenshots/pipeline.png)
+
+*A modular scraping and aggregation architecture where independent scraper services feed normalized startup opportunity data into a centralized MongoDB Atlas cluster.*
 ## Core Engineering Features
 
 - **Automated Aggregation:** Custom scrapers for Hacker News, Dev.to, TechCrunch, and Reddit that run on a background schedule.
