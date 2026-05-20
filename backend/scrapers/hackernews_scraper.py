@@ -29,7 +29,8 @@ class HackerNewsScraper:
                         "organizer": "Hacker News Community",
                         "location": "Remote",
                         "region": "Global",
-                        "deadline": datetime.utcnow() + timedelta(days=14), # Default placeholder
+                        "deadline": None, 
+                        "deadline_text": "Rolling",
                         "source_link": item.get('url') if item.get('url') else f"https://news.ycombinator.com/item?id={item.get('objectID')}",
                         "source": "Hacker News",
                         "description": f"Posted by {item.get('author')}",

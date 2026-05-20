@@ -63,6 +63,19 @@ class OpportunityDB:
                     query = query(region__icontains=filters['region'])
             if 'keyword' in filters and filters['keyword']:
                 query = query.search_text(filters['keyword'])
+            
+            # Timeline (Deadline) Filtering
+            if 'timeline' in filters and filters['timeline']:
+                now = datetime.utcnow()
+                if filters['timeline'] == 'soon':
+                    # Expiring in next 7 days
+                    from datetime import timedelta
+                    seven_days = now + timedelta(days=7)
+                    query = query(deadline__gte=now, deadline__lte=seven_days)
+                elif filters['timeline'] == 'upcoming':
+                    query = query(deadline__gt=now)
+                elif filters['timeline'] == 'rolling':
+                    query = query(deadline=None)
         
         if sort_by == 'newest':
             return query.order_by('-created_at')

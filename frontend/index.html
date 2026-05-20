@@ -117,6 +117,13 @@
         .search-bar:focus-within { border-color: var(--border-bright); background: rgba(255,255,255,0.05); transform: translateY(-2px); box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
         .search-bar input { background: transparent; border: none; color: var(--text); padding: 18px 0; outline: none; width: 100%; font-size: 15px; font-weight: 500; }
 
+        .export-btn { 
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); color: var(--text-dim); 
+            height: 56px; padding: 0 24px; border-radius: 20px; font-weight: 700; font-size: 12px;
+            display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.4s;
+        }
+        .export-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--border-bright); color: #FFF; }
+
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 32px; align-items: start; }
 
         .card {
@@ -193,13 +200,22 @@
             <div class="nav-section">
                 <p class="nav-head">Curate Index</p>
                 <select id="type-filter" onchange="fetchData()"><option value="">All Categories</option></select>
+                <select id="source-filter" onchange="fetchData()" style="margin-top: 16px;"><option value="">All Sources</option></select>
                 <select id="region-filter" onchange="fetchData()" style="margin-top: 16px;"><option value="">All Regions</option><option value="India">India</option><option value="International">International</option></select>
+                <select id="timeline-filter" onchange="fetchData()" style="margin-top: 16px;">
+                    <option value="">All Timelines</option>
+                    <option value="soon">Expiring Soon</option>
+                    <option value="upcoming">Upcoming</option>
+                    <option value="rolling">Rolling/Ongoing</option>
+                </select>
             </div>
         </aside>
         <main class="main">
             <header class="hero"><h1 id="page-title">Discovery</h1><p id="page-desc">Advanced index of world-class startup resources.</p></header>
             <div class="search-area">
                 <div class="search-bar"><i data-lucide="search" size="20" style="color: var(--text-dim);"></i><input type="text" id="search" placeholder="Search the global repository..." onkeypress="if(event.key==='Enter') fetchData()"></div>
+                <button class="export-btn" onclick="exportData('csv')"><i data-lucide="download" size="18"></i> CSV</button>
+                <button class="export-btn" onclick="exportData('json')"><i data-lucide="file-json" size="18"></i> JSON</button>
                 <div style="font-size: 10px; font-weight: 900; color: var(--text-dim); letter-spacing: 0.2em;"><span id="result-count">0</span> RESULTS</div>
             </div>
             <div id="grid" class="grid"></div>
@@ -208,17 +224,39 @@
 
     <script>
         const API_HOSTS = ['http://localhost:5000', 'http://127.0.0.1:5000'];
-        let activeHost = API_HOSTS[0], currentTab = 'discovery', savedIds = JSON.parse(localStorage.getItem('saved_opps') || '[]');
+        let activeHost = API_HOSTS[0], currentTab = 'discovery', savedIds = JSON.parse(localStorage.getItem('saved_opps') || '[]'), currentData = [];
 
         async function tryFetch(path) { for (let host of API_HOSTS) { try { const res = await fetch(host + path); if (res.ok) return res; } catch (e) {} } throw new Error('Offline'); }
-        async function fetchStats() { try { const res = await tryFetch('/api/stats'), s = await res.json(), f = document.getElementById('type-filter'); s.types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; f.appendChild(o); }); } catch (e) {} }
+        async function fetchStats() { 
+            try { 
+                const res = await tryFetch('/api/stats'), s = await res.json();
+                const tf = document.getElementById('type-filter'); 
+                s.types.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; tf.appendChild(o); });
+                const sf = document.getElementById('source-filter');
+                s.sources.forEach(src => { const o = document.createElement('option'); o.value = src; o.textContent = src; sf.appendChild(o); });
+            } catch (e) {} 
+        }
         function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
         async function fetchData() {
             const g = document.getElementById('grid'); g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:100px;color:var(--text-dim)">SYNCING ENVIRONMENT...</div>';
             if (currentTab === 'saved') { renderSaved(); return; }
-            const q = document.getElementById('search').value, t = document.getElementById('type-filter').value, r = document.getElementById('region-filter').value;
-            let p = '/api/opportunities?'; if (q) p += 'q=' + encodeURIComponent(q) + '&'; if (t) p += 'type=' + encodeURIComponent(t) + '&'; if (r) p += 'region=' + encodeURIComponent(r);
-            try { const res = await tryFetch(p), data = await res.json(); document.getElementById('result-count').textContent = data.length; renderCards(data); } catch (e) { g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:100px;color:var(--text-dim)">CONNECTION ERROR</div>'; }
+            const q = document.getElementById('search').value, 
+                  t = document.getElementById('type-filter').value, 
+                  s = document.getElementById('source-filter').value,
+                  r = document.getElementById('region-filter').value,
+                  tm = document.getElementById('timeline-filter').value;
+            let p = '/api/opportunities?'; 
+            if (q) p += 'q=' + encodeURIComponent(q) + '&'; 
+            if (t) p += 'type=' + encodeURIComponent(t) + '&'; 
+            if (s) p += 'source=' + encodeURIComponent(s) + '&';
+            if (r) p += 'region=' + encodeURIComponent(r) + '&';
+            if (tm) p += 'timeline=' + encodeURIComponent(tm);
+            try { 
+                const res = await tryFetch(p), data = await res.json(); 
+                currentData = data;
+                document.getElementById('result-count').textContent = data.length; 
+                renderCards(data); 
+            } catch (e) { g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:100px;color:var(--text-dim)">CONNECTION ERROR</div>'; }
         }
         function renderCards(items) {
             const g = document.getElementById('grid'); g.innerHTML = '';
@@ -250,7 +288,34 @@
             localStorage.setItem('saved_opps', JSON.stringify(savedIds)); if (currentTab === 'saved') fetchData(); lucide.createIcons();
         }
         function switchTab(t) { currentTab = t; document.getElementById('tab-discovery').classList.toggle('active', t === 'discovery'); document.getElementById('tab-saved').classList.toggle('active', t === 'saved'); document.getElementById('page-title').textContent = t === 'discovery' ? 'Discovery' : 'The Vault'; fetchData(); }
-        async function renderSaved() { try { const res = await tryFetch('/api/opportunities'), data = await res.json(), f = data.filter(function(i) { return savedIds.includes(i.id); }); document.getElementById('result-count').textContent = f.length; renderCards(f); } catch (e) {} }
+        async function renderSaved() { try { const res = await tryFetch('/api/opportunities'), data = await res.json(), f = data.filter(function(i) { return savedIds.includes(i.id); }); currentData = f; document.getElementById('result-count').textContent = f.length; renderCards(f); } catch (e) {} }
+        
+        function exportData(format) {
+            if (!currentData || currentData.length === 0) { showToast('No data to export'); return; }
+            let content, type, ext;
+            if (format === 'json') {
+                content = JSON.stringify(currentData, null, 2);
+                type = 'application/json';
+                ext = 'json';
+            } else {
+                const headers = ['Title', 'Type', 'Organizer', 'Region', 'Deadline', 'Source', 'Link'];
+                const rows = currentData.map(i => [
+                    `"${i.title}"`, `"${i.opportunity_type}"`, `"${i.organizer}"`, 
+                    `"${i.region}"`, `"${i.deadline_text || 'Rolling'}"`, `"${i.source}"`, `"${i.source_link}"`
+                ].join(','));
+                content = [headers.join(','), ...rows].join('\n');
+                type = 'text/csv';
+                ext = 'csv';
+            }
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `aura_opportunities_${new Date().toISOString().slice(0,10)}.${ext}`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast(`Exported as ${format.toUpperCase()}`);
+        }
         
         document.addEventListener('mousemove', function(e) {
             const x = (e.clientX / window.innerWidth - 0.5) * 40;

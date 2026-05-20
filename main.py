@@ -24,12 +24,14 @@ def get_opportunities():
     opp_type = request.args.get('type')
     source = request.args.get('source')
     region = request.args.get('region')
+    timeline = request.args.get('timeline')
     keyword = request.args.get('q')
     sort_by = request.args.get('sort', 'deadline')
 
     if opp_type: filters['opportunity_type'] = opp_type
     if source: filters['source'] = source
     if region: filters['region'] = region
+    if timeline: filters['timeline'] = timeline
     if keyword: filters['keyword'] = keyword
 
     try:

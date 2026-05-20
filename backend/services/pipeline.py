@@ -5,6 +5,7 @@ from backend.scrapers.devto_scraper import DevtoScraper
 from backend.scrapers.hackernews_scraper import HackerNewsScraper
 from backend.scrapers.techcrunch_scraper import TechCrunchScraper
 from backend.scrapers.reddit_scraper import RedditScraper
+from backend.services.alert_service import AlertService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -21,9 +22,8 @@ class DataPipeline:
         ]
 
     def run(self):
-        """Runs the entire pipeline: Scraping -> Database Storage."""
+        """Runs the entire pipeline: Scraping -> Database Storage -> Alerts."""
         logger.info("Starting Data Pipeline...")
-...
 
         # 1. Connect to Database
         if not DatabaseConfig.connect():
@@ -32,6 +32,7 @@ class DataPipeline:
 
         total_added = 0
         total_duplicates = 0
+        new_opportunities = []
 
         # 2. Run Scrapers
         for scraper in self.scrapers:
@@ -47,10 +48,16 @@ class DataPipeline:
                     success, message = self.db_handler.add_opportunity(item)
                     if success:
                         total_added += 1
+                        new_opportunities.append(item)
                     elif message == "Duplicate":
                         total_duplicates += 1
             except Exception as e:
                 logger.error(f"Error running scraper {source_name}: {e}")
+
+        # 4. Send Alerts for new matches
+        if new_opportunities:
+            logger.info(f"Triggering alerts for {len(new_opportunities)} new opportunities.")
+            AlertService.send_alerts(new_opportunities)
 
         logger.info(f"Pipeline finished. Total added: {total_added}, Duplicates skipped: {total_duplicates}")
 

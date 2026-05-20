@@ -1,0 +1,31 @@
+This is the invitation link for the discord channel for notifications: https://discord.gg/GkJMctYG
+
+These are all the sources that I have included in this project:
+
+### 1. Automated Scraper Sources
+*   **Hacker News:** Integrated via the Algolia HN API.
+*   **Dev.to:** Uses the Dev.to Articles API.
+*   **Reddit:** Scrapes relevant subreddits (API-first approach).
+*   **TechCrunch:** Custom scraper built with BeautifulSoup.
+
+### 2. Manual Data Sources (Indian Ecosystem)
+*   **Startup India Initiative** (DPIIT & SIDBI)
+*   **NASSCOM** (National Association of Software and Services Companies)
+*   **Indian Angel Network (IAN)**
+*   **T-Hub** (Hyderabad)
+*   **Confederation of Indian Industry (CII)**
+*   **Ministry of MSME** & **Make in India**
+*   **ICICI Bank** (Startup Banking Solutions)
+
+### 3. Global & International Sources
+*   **Y Combinator** (Main Batch & Startup School)
+*   **Techstars**
+*   **500 Global**
+*   **AngelList**
+*   **Plug and Play Tech Center**
+*   **Founder Institute**
+*   **Major Conferences:** Web Summit (Lisbon), Collision Conference (Toronto).
+
+### 4. Specialized & Focused Sources
+*   **Women-focused:** 100 Women Accelerator, Better Capital Women Founders Fellowship.
+*   **Sustainability:** Climate Angels, T-Hub AIC Sustainability.
