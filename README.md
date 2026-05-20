@@ -15,12 +15,12 @@ Since launching the pipeline, I have optimized the system to achieve the followi
 ## Project Visuals
 
 ### Main Discovery Dashboard and Hero
-> ![AURA Dashboard](assets/aura.png)
-> ![AURA Dashboard](assets/Dashboard.png)
+> ![AURA Dashboard](assets/screenshots/aura.png)
+> ![AURA Dashboard](assets/screenshots/Dashboard.png)
 *The AURA interface utilizes a glassmorphic design language, featuring custom-built discovery filters and real-time result counts.*
 
 ### Data Pipeline & Scrapper
-> ![Pipeline](assets/scarapper.png)
+> ![Pipeline](assets/screenshots/scarapper.png)
 *A modular architecture where scrapers operate as independent micro-services, feeding into a centralized MongoDB Atlas cluster.*
 
 ## Core Engineering Features
